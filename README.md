@@ -1,4 +1,4 @@
-ABOUT SHIM
+# ABOUT SHIM
 Shim is a node.js app that enables simultaneous, synced web surfing across a variety of devices and browsers.
 
 Shim was developed by the Boston Globe Media Lab (twitter: @GlobeLab) as a timesaving way to see how its web sites render on a variety of gadgets & browsers. It works by tweaking Wifi to enable the easy synchronization of browsing sessions across several devices, with no client configuration needed.
@@ -15,7 +15,7 @@ There have been a few requests to use the tool, so we're open sourcing it for al
 
 Shim was written in 2011 by Chris Marstall, Creative Technologist at the Boston Globe.
 
-REQUIREMENTS
+## REQUIREMENTS
 * Shim must be installed on a 10.6 Mac with both wired *and* wireless network interfaces (for example, a newer stock MacBook). The wired interface will be used to communicate with the internet; the wireless interface will be used to serve pages to devices. Shim doesn't yet work on OS X Lion (10.7).
 
 INSTALLING SHIM
@@ -29,7 +29,7 @@ INSTALLING SHIM
 7 sudo ./configure_proxy.sh 
 
 
-RUNNING SHIM
+## RUNNING SHIM
 cd shim
 node shim.js
 
@@ -42,28 +42,28 @@ USING SHIM
 6. On any attached device, click on a link. All devices should navigate to that page.
 7. to reset all devices to the Shim homepage, google "shimreset"
 
-BOOKMARKLET 
+## BOOKMARKLET
 The easiest way to start synchronization after connecting devices is to use our bookmarklet. Just click it & all connected devices will be synced to the current page in your browser. To install the bookmark on a connected device, google "shimreset". Your browser should be redirected to the shim homepage, which has a link to the bookmarklet that you can drag to your bookmarks bar.
 
-MANUAL MODE
+## MANUAL MODE
 To set the current page, you can also simply just append the query parameter 's:33t' to any url. So http://foo.com would become http://foo.com/?s:33t . This will cause all currently attached devices to redirect to that url.
 
-SLIDESHOW/AUTOMATION MODE
+## SLIDESHOW/AUTOMATION MODE
 If Shim finds a properly formatted <slideshow> object in config.json, it will rotate through any pages you specify, at a given interval. This can be used simply as a screensaver or demo mode. It may also be useful to do Selenium-style browser automation across several devices. Shim ships with an example values for the slideshow in <config.json.example>. Copy that file to <config.json> and restart Shim. After 10 seconds, you should see boston.com/news pop up on your connected devices, which will then rotate through different pages on boston.com every 10 seconds. Modify the values in the <config.json> to direct the slideshow to your own pages. The values are as follows: 
 	INTERVAL: the number of milliseconds to wait before switching. Ex: "interval":10000
 	PATH_BASE: if all your urls are on the same domain, you can enter the first part of the url here, starting with "http://", so you don't have to repeat it several times. Ex: "path_base":"http://www.boston.com/"
 	PATHS: A json array of urls or partial urls to visit. The value of "path_base", if it is not blank, will be prepended to these. Exs: "paths":["news","sports"] or "paths":["http://www.boston.com/news","http://www.bostonglobe.com/sports"]
 
-SHARED COOKIES
+## SHARED COOKIES
 By default, all cookies delivered by a server to any of the devices will be shared across all devices. This means you only have to log in on one browser, and all the others will automatically be logged in in the next request. To exclude a given cookie from the shared pool, add its name to the "excluded_cookies" object in <config.json> and restart Shim.
 
-CONFIG FILE
+## CONFIG FILE
 Shim will work without a config file. However, if you want to add a slideshow or do some basic cookie management, you should create a config file in the Shim home directory and call it <config.json>. The easiest way is to rename <config.json.template> to <config.json> and modify it to suit your needs. 
 
-AFTER A SYSTEM RESTART
+## AFTER A SYSTEM RESTART
 run ./configure_proxy.sh
 
-UNINSTALLING SHIM
+## UNINSTALLING SHIM
 
 To uninstall Shim, do the following
 
@@ -77,4 +77,4 @@ $ sudo vi /etc/sysctl.conf
 
 $ sudo ipfw delete 02000 
 
-# then, restart - all network configurations should be reversed now. you may also wish to uninstall node.js, NPM, and the NPM packages installed in setup.sh
+then, restart - all network configurations should be reversed now. you may also wish to uninstall node.js, NPM, and the NPM packages installed in setup.sh
