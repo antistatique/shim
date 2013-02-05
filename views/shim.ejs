@@ -1,175 +1,179 @@
-<script src='http://<%=host%>/socket.io/socket.io.js'></script> 
-<script src='http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js'></script> 
-<script> 
+<script src='http://<%=host%>/socket.io/socket.io.js'></script>
+< script
+src = 'http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js' > </script>
+    <script>
 
-shim = function()
-{
-	set_string = 's:33t=1'
-	set_regexp = /s\:33t(\=1)?$/
-	count=0
-	message_sent=null;
-	connected=false;
-	socket = null;
-	original_title=''  
+    shim = function() {
+        set_string = 's:33t=1'
+        set_regexp = /s\:33t(\=1)?$/
+        count=0
+        message_sent=null;
+        connected=false;
+        socket = null;
+        original_title=''
 
-	jQuery.noConflict();
+        jQuery.noConflict();
 
 
-	return {
-		
-		insp_obj:function(obj,count)
-		{
-			if (!count) count=0
-			count=count+1;
-			this.log(count)
-			if (count>10)
+        return {
+
+        insp_obj:function(obj,count)
+        {
+        if (!count) count=0
+        count=count+1;
+        this.log(count)
+        if (count>10)
+        {
+        this.log('too deep!')
+        }
+
+    for (prop in obj)
 			{
-				this.log('too deep!')
-			}
-	
-			for (prop in obj)
-			{
-				if (typeof(obj[prop])=='function')
+                if (typeof(obj[prop])=='function')
+                {
+                this.log(prop)
+                }
+    else
 				{
-					this.log(prop)
-				}
-				else
-				{
-					o =obj[prop]
-					this.log(prop+":"+o)
-			
-					//if (o) insp_obj(o,count)
-				}
-			}
-		}, 
+                    o = obj[prop]
+                    this.log(prop+":"+o)
 
-		set_status:function(status)
-		{
-			document.title=status
-			if (typeof(console)!='undefined')
-			{
-				this.log(status)
-			}
-	//		$("#log").append("<div><span style='color:gray'>"+new Date().getTime()/1000+"</span>&nbsp;"+status+"</div>")
-	//		alert(status);
-		},
+                    //if (o) insp_obj(o,count)
+                    }
+    }
+    },
 
-		send_url:function(url,append_set_string)
+    set_status:function(status)
 		{
-			try
-			{
-				if (append_set_string && url) 
-				{
-					if (url.match(/\?/)) url+='&'
-					else url+='?'
-					url+=this.set_string
-				}
-				message_sent = url
-				if (message_sent)
-				{
-					socket.send(message_sent);
-					this.log("sent_url: "+url)
-					connected=true;
-				}
-			}
-			catch (err)
-			{
-				//alert(err)
-			}
-		},
+            document.title = status
+            if (typeof(console)!='undefined')
+            {
+            this.log(status)
+            }
+    //        $("#log").append("
+        <div>
+            <span style='color:gray'>"+new Date().getTime()/1000+"</span>
+        &nbsp;"+status+"</div>
+    ")
+    //        alert(status);
+    },
 
-		log:function(s)
+    send_url:function(url,append_set_string)
 		{
-			try
+            try
+            {
+            if (append_set_string && url)
+            {
+            if (url.match(/\?/)) url+='&'
+            else url+='?'
+            url+=this.set_string
+            }
+    message_sent = url
+    if (message_sent)
+				{
+                    socket.send(message_sent);
+                    this.log("sent_url: "+url)
+                    connected=true;
+                    }
+    }
+    catch (err)
 			{
-				if (console) console.log(s);
-			}
-			catch (err)
+                //alert(err)
+                }
+    },
+
+    log:function(s)
+		{
+            try
+            {
+            if (console) console.log(s);
+            }
+    catch (err)
 			{}
-		},
-	
-		connect:function()
+    },
+
+    connect:function()
 		{
-			var host = '<%=host%>';
-			if (host.indexOf(":")>0) host = host.substring(0,host.indexOf(':')); 
-			socket = io.connect(host);//,{transports:['websocket', 'flashsocket', 'xhr-polling', 'htmlfile', 'xhr-multipart', 'jsonp-polling']}); 
-			//socket = new io.socket(host,{port:80}); 
-			this.set_status("created socket");
-		//	socket.connect(); 
-			that = this
-			socket.on('message', function(data){
-				connected=true;
-				data = data.toString()
-				that.log('recd msg '+data);
-				if (data.substring(0,4)=='http') 
-				{
-					if (data.toString()!=top.location.href) 
-					{
-						that.log(Math.floor(Math.random()*10)+" rcv "+data);
-						top.location.href=data.toString();
-					}
-				}
-			});
-			connected=true
-		},
-	
-		change_urls:function(context)
+            var host = '<%=host%>';
+            if (host.indexOf(":")>0) host = host.substring(0,host.indexOf(':'));
+            socket = io.connect(host);//,{transports:['websocket', 'flashsocket', 'xhr-polling', 'htmlfile', 'xhr-multipart', 'jsonp-polling']});
+    //socket = new io.socket(host,{port:80});
+    this.set_status("created socket");
+    //    socket.connect();
+    that = this
+    socket.on('message', function(data){
+        connected = true;
+        data = data.toString()
+        that.log('recd msg '+data);
+        if (data.substring(0,4)=='http')
+        {
+        if (data.toString()!=top.location.href)
+        {
+        that.log(Math.floor(Math.random()*10)+" rcv "+data);
+        top.location.href=data.toString();
+        }
+    }
+    });
+    connected=true
+    },
+
+    change_urls:function(context)
 		{
-			if (!context) context=this
-			num_to_change = jQuery("a[href]").size();
-			context.log("changing "+num_to_change+" urls.");
-			context.insp_obj(context)
-			jQuery("a[href]").each(function()
-			   { 
-					if (!this.href.match(set_regexp)&&!this.href.match('^javascript')&&!this.href.match(/\#/)) 
-					{
-						context.log("changing " + this.href);
-						parts = this.href.split("#")
-						href = parts[0]
-						if (!href.match(/\?/)) href = href+"?"
-						else href+="&"
-						href+=set_string
-						this.href=href
-					}
-			   });
-		},
+            if (!context) context=this
+            num_to_change = jQuery("a[href]").size();
+            context.log("changing "+num_to_change+" urls.");
+            context.insp_obj(context)
+            jQuery("a[href]").each(function()
+            {
+            if (!this.href.match(set_regexp)&&!this.href.match('^javascript')&&!this.href.match(/\#/))
+            {
+            context.log("changing " + this.href);
+            parts = this.href.split("#")
+            href = parts[0]
+            if (!href.match(/\?/)) href = href+"?"
+            else href+="&"
+            href+=set_string
+            this.href=href
+            }
+    });
+    },
 
-		disable_refresh:function(context)
+    disable_refresh:function(context)
 		{
-			// disable any meta-refresh. 
-			// ex: change <meta http-equiv="Refresh" content="900;url=?refresh=true"> to <meta http-equiv="Refresh" content="">
-			if (!context) context=this
-			refresh_meta = jQuery("meta[http-equiv='Refresh']")
-			content = refresh_meta.attr('content')
-			refresh_meta.attr('content','')
-		},
+            // disable any meta-refresh.
+            // ex: change <meta http-equiv="Refresh" content="900;url=?refresh=true"> to <meta http-equiv="Refresh" content="">
+            if (!context) context=this
+            refresh_meta = jQuery("meta[http-equiv='Refresh']")
+            content = refresh_meta.attr('content')
+            refresh_meta.attr('content','')
+            },
 
-		init:function() 
-		{ 
-			connected=false;
-			original_title=document.title
-			this.change_urls(this);
-			this.disable_refresh(this)
-			//setInterval(this.change_urls(this),1000);
+    init:function()
+		{
+            connected = false;
+            original_title=document.title
+            this.change_urls(this);
+            this.disable_refresh(this)
+            //setInterval(this.change_urls(this),1000);
 
-			try 
-			{ 
-				this.connect();
-				this.send_url(top.location.href);
-				//setTimeout(this.send_url(top.location.href),2000)
-				that=this
-				socket.on('disconnect', function(){connected=false;that.connect(); that.set_status("recvd disconnect, attempting reconnect");});
-			} 
-			catch (err) 
-			{ 
-				alert(err); 
-			} 
-		} 
-	}
-}();
+            try
+            {
+            this.connect();
+            this.send_url(top.location.href);
+            //setTimeout(this.send_url(top.location.href),2000)
+            that=this
+            socket.on('disconnect', function(){connected=false;that.connect(); that.set_status("recvd disconnect, attempting reconnect");});
+    }
+    catch (err)
+			{
+                alert(err);
+                }
+    }
+    }
+    }();
 
-jQuery(document).ready(function() { 
-	shim.init(); 
-}); 
+    jQuery(document).ready(function() {
+        shim.init();
+        });
 
-</script>
+    </script>
