@@ -9,7 +9,7 @@ url_module = require('url')
 var set_string = 's:33t=1'
 var set_regexp = /s\:33t(\=1)?$/
 var attach_command_string = /attach/
-var reset_command_string = /shimreset/
+var reset_command_string = /detach/
 
 var is_redirect = function(req)
 {
@@ -182,7 +182,6 @@ _is_settable = function(req)
 	}
 	else
 	{
-//		console.log("--- not settable: "+browser_signature+":"+unique_browsers[browser_signature])
 		return is_settable_by_url(req);
 	} 
 }
@@ -214,16 +213,12 @@ is_settable=function(req)
 attach_command = function(url) 
 {
 	m =  url.match(attach_command_string);
-//	console.log(url+":"+attach_command_string+":"+m)
 	return m;
 }
 
 reset_command = function(url) 
-{
-	
+{	
 	m =  url.match(reset_command_string);
-	n = url.match(/google/)
-//	console.log(url+":"+attach_command_string+":"+m)
 	return m;
 }
 
@@ -238,15 +233,23 @@ function homepage(req,res)
 {
 	Path=home_url
 	s ="<meta name='viewport' content='user-scalable=no, width=device-width,initial-scale=1, minimum-scale=1, maximum-scale=1'/>"
-	s+=generate_shim(req)
-	s+="<div style='font-family:Courier;color:red'> \
-	<h1 style=\"border-bottom:4px solid red\"> Shim </h1> \
-	<div style='color:black'> \
-	<form onsubmit=\"send_url(jQuery('#url').val(),true);return false;\"> \
-	Enter url:  <input id='url' type='text' value='http://' width=120px/> <input type='submit' value='Set'/> </form> \
-	</div> "
-
-	s+='<a href=\'javascript:url=document.location.href;url.match(/\\?/)?url+="&":url+="?";url+="'+set_string+'";document.location.href=url\'>shim bookmarklet</a> (drag to toolbar)'
+	s +=generate_shim(req)
+	s +="<script> \
+		function page_redirect(url){ \
+		url.match(/\\?/) ? url += '&' : url += '?'; \
+		url+='"+set_string+"'; \
+		document.location.href=url; \
+		return false; \
+	} \
+	</script>"
+	s += "<div style='font-family:Courier;color:red'> \
+		 <h1 style='border-bottom:4px solid red'> Shim </h1> \
+		 <div style='color:black'> \
+		 <form onsubmit='return page_redirect(this.url.value);'> \
+	       URL:  <input id='url' name='url' type='text' value='http://' width=120px/> <input type='submit' value='Set'/> \
+	     </form> \
+	     </div> "
+	s += '<a href=\'javascript:url=document.location.href;url.match(/\\?/)?url+="&":url+="?";url+="'+set_string+'";document.location.href=url\'>shim bookmarklet</a> (drag to toolbar)'
 	
 	if (homepage_urls.length>0)
 	{
@@ -274,6 +277,7 @@ function handle_attach(req,res)
 		handle_reset(req,res);
 		return;
 	}
+	console.log('redirect: ' + Path)
 	res.write("<script>top.location.href='"+Path+"'</script>");
 	res.end();
 	return;
@@ -321,7 +325,6 @@ initialize_slideshow = function() {
 
 server = http.createServer(function (req, res) 
 {
-//  for (property in req.headers) console.log(property + ":" +req.headers[property]+"")
 	if (req.url=='/shim')
 	{
 		console.log("showing homepage with shim.")
@@ -329,40 +332,33 @@ server = http.createServer(function (req, res)
 		return;
 	}
   _path = "http://"+req.headers['host']+req.url;
-	//if ((is_top_html_request || valid_paths[_path])&&!req.headers['referer']&&!excluded(req))
 	url = req.url
-//	insp_obj(query);
-//	console.log("request for "+_path)
-//	console.log("===="+url+"'"+url.match(attach_command))
+
 	if (reset_command(url))
 	{
+		console.log("device detaching")
 		handle_reset(req,res);
-		console.log("shimreset received.")
 	}
 	if (attach_command(url))
 	{
-		handle_attach(req,res);
 		console.log("device attaching.")
+		handle_attach(req,res);
 		return;
 	}
 	
-	if (is_settable(req))//&&ready_for_text_html(req,_path)) 
+	if (is_settable(req))
 	{
 		console.log("+++s3tting Path: "+_path)
 		Path=_path
 		console.log ("-----------------------------------")
 		console.log (req.url+" gets shim")
 		console.log ("-----------------------------------")
-//		valid_paths[_path]=true
-//	  is_top_html_request=false
-//		setTimeout(function(){is_top_html_request=true;console.log("resetting is_top_html_request=true")},5000)
 		shim_proxy(req,res);
 		broadcast(Path)
 	}
 	else
 	{
-//		console.log (" %%%%%%%%%%%%%% no shim "+req.url)
-  	var proxy = new httpProxy.HttpProxy();
+  		var proxy = new httpProxy.HttpProxy();
 		if (res.statusCode>=300 && res.statusCode<400)
 		{
  			console.log("+++++++++++++ statusCode:"+res.statusCode)
@@ -395,7 +391,6 @@ function handle_cookies(host,req)
 	// add any cookies in the request to the collection of cookies for this domain, avoiding dupes.
 	// then set the value of 'cookies:' to hold all the cookies in the collection.
 	new_cookies = req.headers.cookie||""
-//	console.log("+++ new incoming cookies: " + new_cookies)
 	pairs = new_cookies.split(";")
 	existing_cookies = cookies[host]||{}
 	for (i in pairs)
@@ -408,7 +403,6 @@ function handle_cookies(host,req)
 			if (CONFIG && (CONFIG.excluded_cookies[name]!=null)) next;
 			value = x[1].trim();
 			if (value.length>0) existing_cookies[name]=value
-//			console.log("new cookie:"+name+":"+value)
 		}
 	}
 	combined_cookie_string = ""
@@ -419,13 +413,10 @@ function handle_cookies(host,req)
 	}
 	req.headers.cookie=combined_cookie_string
 	cookies[host]=existing_cookies
-	//console.log("+++ combined_cookie_string for "+host+": " + combined_cookie_string)
 }
 
 shim_proxy = function(request,response)
 {
-//	shim = "<meta name='viewport' content='user-scalable=no, width=device-width,initial-scale=1, minimum-scale=1, maximum-scale=1'/>"
-//	shim+="<script>globe.OAS=null</script>"
 	shim = generate_shim(request)     
 	host = request.headers['host']
 	var proxy = http.createClient(80, host)
@@ -444,15 +435,7 @@ shim_proxy = function(request,response)
 		var actual_content_length = 0
 		proxy_response.addListener('data', function(chunk) 
 		{
-/*			if (!shim_added)
-			{
-				console.log("actually adding shim with size "+shim.length)
-				chunk=shim+chunk;
-				shim_added=true;
-			}
-*/
 			actual_content_length+=chunk.length
-//			console.log("SHIM PAGE chunk: "+chunk.length+":"+actual_content_length+"/"+declared_content_length)
 			response.write(chunk, 'binary');
 		}); //addListener
 
@@ -463,7 +446,6 @@ shim_proxy = function(request,response)
 			response.write(shim, 'binary');
 			response.end();
 		});
-//		console.log("SHIM PAGE adding headers")
 		headers = proxy_response.headers
 		declared_content_length = headers['content-length']=(parseInt(headers['content-length'])+shim.length); 
 		if (is_redirect(proxy_response))
@@ -491,7 +473,7 @@ console.log("server:"+server)
 
 
 var io = socket_io.listen(server);
-
+io.set('log level', 1);
 sockets_hash={}
 
 // socket.io 
@@ -507,7 +489,7 @@ io.sockets.on('connection', function(socket){
 	socket.on('message', function(s) { 
 		if (s)
 		{
-			console.log('!!!!!!!!!!!!!!! received message, broadcasting:' + s);
+			console.log('Received new url:' + s);
 			Path=s
 			broadcast(Path)//,client);
 	}
@@ -515,7 +497,6 @@ io.sockets.on('connection', function(socket){
 	}) 
 	socket.on('disconnect', function(socket)
 	{ 
-//		sockets_hash[socket.id]=null;
 		console.log('disconnect'); 
 	}) 
 });
@@ -523,26 +504,20 @@ io.sockets.on('connection', function(socket){
 
 broadcast = function(msg,sending_client)
 {
-	console.log ("attempting broadcast: "+msg)
-	log_connections();
 	if (!last_broadcast || new Date().getTime()-broadcast_timeout>last_broadcast)
 	{
-		if (msg) 
+		if (msg && msg !== null) 
 		{
 			io.sockets.send(msg)//,sending_client) // don't broadcast to sending client
 			console.log ("broadcasting "+msg)
 			last_broadcast=new Date().getTime();
 		}
 	}
-	else
-	{
-		//console.log("in timeout, no broadcast: "+last_broadcast+":"+new Date().getTime()+":"+broadcast_timeout)
-	}
 }
 
 _log_connections = function()
 {
-	s= "[ "
+	var s= "[ "
 	insp_obj(io.sockets)
 	for (client in io.clients)
 	{
@@ -556,15 +531,7 @@ _log_connections = function()
 
 log_connections = function()
 {
-/*	s= "[ "
-	for (socket in sockets_hash)
-	{
-		insp_obj(sockets_hash[socket])
-		if (sockets_hash[socket]) s+=socket+" "
-	}
-	s+="] "
-*/
-	s=Path
+	var s=Path
 	console.log(s)
 }
 
