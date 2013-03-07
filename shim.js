@@ -214,13 +214,13 @@ function homepage(req, res) {
 		return false; \
 	} \
 	</script>"
-    s += "<div style='font-family:Courier;color:red'> \
-		 <h1 style='border-bottom:4px solid red'> Shim </h1> \
-		 <div style='color:black'> \
-		 <form onsubmit='return page_redirect(this.url.value);'> \
-	       URL:  <input id='url' name='url' type='text' value='http://' width=120px/> <input type='submit' value='Set'/> \
-	     </form> \
-	     </div> "
+    s += "<div style='font-family:helvetica;color:#fff;background-color:#0088cc;padding:20px;margin:20px;border-radius:15px'> \
+     <h1 style='border-bottom:1px solid #fff'> Shim </h1> \
+     <div> \
+     <form onsubmit='return page_redirect(this.url.value);'> \
+         URL  <input id='url' name='url' type='text' value='http://' width='300' style='padding:3px;'/> <input type='submit' value='Set' style='font-size:24px;'/> \
+       </form> \
+       </div> "
     s += '<a href=\'javascript:url=document.location.href;url.match(/\\?/)?url+="&":url+="?";url+="' + set_string + '";document.location.href=url\'>shim bookmarklet</a> (drag to toolbar)'
 
     if (homepage_urls.length > 0) {
